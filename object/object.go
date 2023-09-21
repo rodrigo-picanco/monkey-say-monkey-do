@@ -16,7 +16,8 @@ const (
 	RETURN_VALUE_OBJ = "RETURN_VALUE"
 	ERROR_OBJ        = "ERROR"
 	FUNCTION_OBJ     = "FUNCTION"
-        STRING_OBJ       = "STRING"
+	STRING_OBJ       = "STRING"
+	BUILTIN_OBJ      = "BUILTIN"
 )
 
 type Object interface {
@@ -82,31 +83,43 @@ type Function struct {
 	Body       *ast.BlockStatement
 	Env        *Environment
 }
-func (f *Function) Type() ObjectType {
-  return FUNCTION_OBJ
-}
-func (f *Function) Inspect() string{
-  var out bytes.Buffer
-  params := []string{}
-  for _, p := range f.Parameters {
-    params = append(params, p.String())
-  }
-  out.WriteString("fn")
-  out.WriteString("(")
-  out.WriteString(strings.Join(params, ", "))
-  out.WriteString(" ) { \n")
-  out.WriteString(f.Body.String())
-  out.WriteString("\n}")
-  return out.String()
-}
 
+func (f *Function) Type() ObjectType {
+	return FUNCTION_OBJ
+}
+func (f *Function) Inspect() string {
+	var out bytes.Buffer
+	params := []string{}
+	for _, p := range f.Parameters {
+		params = append(params, p.String())
+	}
+	out.WriteString("fn")
+	out.WriteString("(")
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(" ) { \n")
+	out.WriteString(f.Body.String())
+	out.WriteString("\n}")
+	return out.String()
+}
 
 type String struct {
-  Value string
+	Value string
 }
+
 func (s *String) Type() ObjectType {
-  return STRING_OBJ
+	return STRING_OBJ
 }
 func (s *String) Inspect() string {
-  return s.Value
+	return s.Value
+}
+
+type BuiltinFunction func(args ...Object) Object
+type Builtin struct {
+  Fn BuiltinFunction
+}
+func (b *Builtin) Type() ObjectType {
+  return BUILTIN_OBJ
+}
+func (b *Builtin) Inspect() string {
+  return "builtin function"
 }
