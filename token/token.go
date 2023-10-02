@@ -53,4 +53,7 @@ const (
 	EQ        = "=="
 	NOT_EQ    = "!="
 	STRING    = "STRING"
+        LBRACKET  = "["
+        RBRACKET  = "]"
+        COLON     = ":"
 )
