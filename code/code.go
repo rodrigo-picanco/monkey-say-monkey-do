@@ -11,15 +11,48 @@ type Definition struct {
 	OperandWidths []int
 }
 
+type Opcode byte
+
+const (
+	OpConstant Opcode = iota
+	OpAdd
+	OpPop
+	OpSub
+	OpMul
+	OpDiv
+	OpTrue
+	OpFalse
+	OpEqual
+	OpNotEqual
+	OpGreaterThan
+	OpMinus
+	OpBang
+	OpJumpNotTruthy
+	OpJump
+        OpNull
+        OpGetGlobal
+        OpSetGlobal
+)
+
 var definitions = map[Opcode]*Definition{
-	OpConstant: {"OpConstant", []int{2}},
-        OpAdd: {"OpAdd", []int{}},
-        OpPop: {"OpAdd", []int{}},
-        OpSub: {"OpSub", []int{}},
-        OpMul: {"OpMul", []int{}},
-        OpDiv: {"OpDiv", []int{}},
-        OpTrue: {"OpTrue", []int{}},
-        OpFalse: {"OpFalse", []int{}},
+	OpConstant:      {"OpConstant", []int{2}},
+	OpAdd:           {"OpAdd", []int{}},
+	OpPop:           {"OpPop", []int{}},
+	OpSub:           {"OpSub", []int{}},
+	OpMul:           {"OpMul", []int{}},
+	OpDiv:           {"OpDiv", []int{}},
+	OpTrue:          {"OpTrue", []int{}},
+	OpFalse:         {"OpFalse", []int{}},
+	OpEqual:         {"OpEqual", []int{}},
+	OpNotEqual:      {"OpNotEqual", []int{}},
+	OpGreaterThan:   {"OpGreaterThan", []int{}},
+	OpMinus:         {"OpMinus", []int{}},
+	OpBang:          {"OpBang", []int{}},
+	OpJumpNotTruthy: {"OpJumpNotTruthy", []int{2}},
+	OpJump: {"OpJump", []int{2}},
+        OpNull: {"OpNull", []int{}},
+        OpGetGlobal: {"OpGetGlobal", []int{2}},
+        OpSetGlobal: {"OpSetGlobal", []int{2}},
 }
 
 func Lookup(op byte) (*Definition, error) {
@@ -31,19 +64,6 @@ func Lookup(op byte) (*Definition, error) {
 }
 
 type Instructions []byte
-
-type Opcode byte
-
-const ( 
-    OpConstant Opcode = iota
-    OpAdd
-    OpPop
-    OpSub
-    OpMul
-    OpDiv
-    OpTrue
-    OpFalse
-)
 
 func Make(op Opcode, operands ...int) []byte {
 	def, ok := definitions[op]
@@ -90,8 +110,8 @@ func (ins Instructions) fmtInstruction(def *Definition, operands []int) string {
 		return fmt.Sprintf("ERROR: operand len %d does not match defined %d\n", len(operands), operandCount)
 	}
 	switch operandCount {
-        case 0:
-            return def.Name
+	case 0:
+		return def.Name
 	case 1:
 		return fmt.Sprintf("%s %d", def.Name, operands[0])
 	}
@@ -113,3 +133,4 @@ func ReadOperands(def *Definition, ins Instructions) ([]int, int) {
 func ReadUint16(ins Instructions) uint16 {
 	return binary.BigEndian.Uint16(ins)
 }
+
