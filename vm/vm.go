@@ -8,6 +8,7 @@ import (
 )
 
 const StackSize = 2048
+const GlobalsSize = 65536
 
 var True = &object.Boolean{Value: true}
 var False = &object.Boolean{Value: false}
@@ -18,6 +19,7 @@ type VM struct {
 	instructions code.Instructions
 	stack        []object.Object
 	sp           int // Always points to the next value. Top of stack is stack[sp-1]
+        globals []object.Object
 }
 
 func New(bytecode *compiler.Bytecode) *VM {
@@ -26,6 +28,7 @@ func New(bytecode *compiler.Bytecode) *VM {
 		instructions: bytecode.Instructions,
 		stack:        make([]object.Object, StackSize),
 		sp:           0,
+                globals: make([]object.Object, GlobalsSize),
 	}
 }
 
@@ -94,6 +97,17 @@ func (vm *VM) Run() error {
 			if err != nil {
 				return err
 			}
+                case code.OpSetGlobal:
+                        globalIndex := code.ReadUint16(vm.instructions[ip+1:])
+                        ip += 2
+                        vm.globals[globalIndex] = vm.pop()
+                case code.OpGetGlobal:
+                        globalIndex := code.ReadUint16(vm.instructions[ip+1:])
+                        ip += 2
+                        err := vm.push(vm.globals[globalIndex])
+                        if err != nil {
+                                return err
+                        }
 		}
 	}
 	return nil
@@ -138,7 +152,19 @@ func (vm *VM) executeBinaryOperation(op code.Opcode) error {
 	if leftType == object.INTEGER_OBJ && rightType == object.INTEGER_OBJ {
 		return vm.executeBinaryIntegerOperation(op, left, right)
 	}
+	if leftType == object.STRING_OBJ && rightType == object.STRING_OBJ{
+		return vm.executeBinaryStringOperation(op, left, right)
+	}
 	return fmt.Errorf("unsupported types for binary operation: %s %s", leftType, rightType)
+}
+
+func (vm *VM) executeBinaryStringOperation(op code.Opcode, left, right object.Object) error {
+        if op != code.OpAdd {
+                return fmt.Errorf("unknown string operator: %d", op)
+        }
+        leftValue := left.(*object.String).Value
+        rightValue := right.(*object.String).Value
+        return vm.push(&object.String{Value: leftValue + rightValue})
 }
 
 func (vm *VM) executeBinaryIntegerOperation(op code.Opcode, left, right object.Object) error {
@@ -223,4 +249,10 @@ func (vm *VM) executeMinusOperator() error {
 	}
 	value := operand.(*object.Integer).Value
 	return vm.push(&object.Integer{Value: -value})
+}
+
+func NewWithGlobalsStore(bytecode *compiler.Bytecode, s[]object.Object) *VM {
+        vm := New(bytecode)
+        vm.globals = s
+        return vm
 }
