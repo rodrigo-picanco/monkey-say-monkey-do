@@ -224,7 +224,7 @@ func (vm *VM) executeComparison(op code.Opcode) error {
 	case code.OpEqual:
 		return vm.push(nativeBoolToBooleanOBject(right == left))
 	case code.OpNotEqual:
-		return vm.push(nativeBoolToBooleanOBject(right == left))
+		return vm.push(nativeBoolToBooleanOBject(right != left))
 	default:
 		return fmt.Errorf("unknown operator: %d (%s %s)", op, left.Type(), right.Type())
 	}
