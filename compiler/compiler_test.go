@@ -568,7 +568,7 @@ func TestCompilerScopes(t *testing.T) {
         compiler.emit(code.OpMul)
         compiler.enterScope()
         if compiler.scopeIndex != 1 {
-                t.Errorf("scopeIndex wrong. got=%d", compiler.scopeIndex, 1)
+                t.Errorf("scopeIndex wrong. got=%d, want=%d", compiler.scopeIndex, 1)
         }
         compiler.emit(code.OpSub)
         if len(compiler.scopes[compiler.scopeIndex].instructions) != 1 {
