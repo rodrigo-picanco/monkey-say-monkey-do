@@ -126,7 +126,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		if err != nil {
 			return err
 		}
-		if c.lastInstructionIsPop() {
+		if c.lastInstructionIs(code.OpPop) {
 			c.removeLastPop()
 		}
 		jumpPos := c.emit(code.OpJump, 9999)
@@ -140,7 +140,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 			if err != nil {
 				return err
 			}
-			if c.lastInstructionIsPop() {
+			if c.lastInstructionIs(code.OpPop) {
 				c.removeLastPop()
 			}
 		}
@@ -266,8 +266,11 @@ func (c *Compiler) addInstruction(ins []byte) int {
 	return posNewInstruction
 }
 
-func (c *Compiler) lastInstructionIsPop() bool {
-	return c.scopes[c.scopeIndex].lastInstruction.Opcode == code.OpPop
+func (c *Compiler) lastInstructionIs(op code.Opcode) bool {
+        if len(c.currentInstructions()) == 0 {
+                return false
+        }
+	return c.scopes[c.scopeIndex].lastInstruction.Opcode == op
 }
 
 func (c *Compiler) removeLastPop() {
@@ -320,3 +323,4 @@ func (c *Compiler) leaveScope() code.Instructions {
         c.scopeIndex--
         return instructions
 }
+
