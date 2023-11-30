@@ -20,6 +20,8 @@ type VM struct {
 	stack        []object.Object
 	sp           int // Always points to the next value. Top of stack is stack[sp-1]
         globals []object.Object
+        frames []*Frame
+        framesIndex int
 }
 
 func New(bytecode *compiler.Bytecode) *VM {
@@ -339,4 +341,18 @@ func (vm *VM) executeHashIndex(hash, index object.Object) error {
                 return vm.push(Null)
         }
         return vm.push(pair.Value)
+}
+
+func (vm *VM) currentFrame() *Frame {
+        return vm.frames[vm.framesIndex-1]
+}
+
+func (vm *VM) pushFrame(f *Frame)  {
+        vm.frames[vm.framesIndex] = f
+        vm.framesIndex++
+}
+
+func (vm *VM) popFrame() *Frame {
+        vm.framesIndex--
+        return vm.frames[vm.framesIndex]
 }
