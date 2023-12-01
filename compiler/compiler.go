@@ -325,6 +325,7 @@ func (c *Compiler) enterScope() {
                 lastInstruction: EmmitedInstruction{},
                 previousInstruction: EmmitedInstruction{},
         }
+        c.symbolTable = NewEnclosedSymbolTable(c.symbolTable)
         c.scopes = append(c.scopes, scope)
         c.scopeIndex++
 }
@@ -332,6 +333,7 @@ func (c *Compiler) enterScope() {
 func (c *Compiler) leaveScope() code.Instructions {
         instructions := c.currentInstructions()
         c.scopes = c.scopes[:len(c.scopes)-1]
+        c.symbolTable = c.symbolTable.Outer
         c.scopeIndex--
         return instructions
 }
